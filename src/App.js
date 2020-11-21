@@ -14,6 +14,7 @@ function App() {
   }, []);
   return (
     <div className="App">
+      <h1>blll</h1>
       <ImageUpload />
       {posts.map((post) => (
         <h1>
