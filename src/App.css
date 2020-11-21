@@ -1,3 +1,11 @@
 * {
   margin: 0;
 }
+.first {
+  color: aqua;
+}
+
+.app__signup {
+  display: flex;
+  flex-direction: column;
+}
