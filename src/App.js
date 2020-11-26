@@ -41,14 +41,22 @@ function App() {
   const [password, setPassword] = useState("");
 
   useEffect(() => {
+    
     db.collection("posts").onSnapshot((snapshot) => {
+      if (snapshot.docs.length==0) {
+         console.log("No elements")
+      }
+      else{
+        console.log("elements")
+      }
       //every time the db changes ittakes a snapshot
-      setPosts(snapshot.docs.map((doc) => doc.data()));
+      setPosts(snapshot.docs.map((doc) => doc.data()
+      ));
     });
   }, []);
 
   const SignUp = (event) => {
-    event.prevetDefault();
+    event.preventDefault();
     auth
       .createUserWithEmailAndPassword(email, password)
       .catch((error) => alert(error.message));
@@ -85,16 +93,20 @@ function App() {
               <Button type="submit" onClick={SignUp}>
                 Signup
               </Button>
+              <Button type="submit" onClick={login}>
+    login
+              </Button>
             </center>
           </form>
         </div>
       </Modal>
-      <h1 className="app__signup">blll</h1>
+      <h1 className="app__signup">bllss</h1>
       <ImageUpload />
       {posts.map((post) => (
         <h1>
           {post.username}
           <br />
+        
           {post.caption}
         </h1>
       ))}
