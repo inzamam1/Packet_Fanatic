@@ -39,19 +39,17 @@ function App() {
   const [username, setUsername] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [signin,setOpenSignin]=useState("");
 
   useEffect(() => {
-    
     db.collection("posts").onSnapshot((snapshot) => {
-      if (snapshot.docs.length==0) {
-         console.log("No elements")
-      }
-      else{
-        console.log("elements")
+      if (snapshot.docs.length == 0) {
+        console.log("No elements");
+      } else {
+        console.log("elements");
       }
       //every time the db changes ittakes a snapshot
-      setPosts(snapshot.docs.map((doc) => doc.data()
-      ));
+      setPosts(snapshot.docs.map((doc) => doc.data()));
     });
   }, []);
 
@@ -60,7 +58,16 @@ function App() {
     auth
       .createUserWithEmailAndPassword(email, password)
       .catch((error) => alert(error.message));
+      setOpen(false);
   };
+
+  const Login =(event)=>{
+    event.preventDefault(); 
+    auth
+    .signInWithEmailAndPassword(email,password)
+    .catch((error)=>alert(error.message));
+    setOpenSignin(false);
+  }
   return (
     <div className="App">
       <Modal open={open} onClose={() => setOpen(false)}>
@@ -75,7 +82,7 @@ function App() {
                 value={username}
                 onChange={(e) => setUsername(e.target.value)}
               />
-              <br></br>
+
               <Input
                 placeholder="email"
                 type="text"
@@ -93,24 +100,51 @@ function App() {
               <Button type="submit" onClick={SignUp}>
                 Signup
               </Button>
-              <Button type="submit" onClick={login}>
-    login
+            </center>
+          </form>
+        </div>
+      </Modal>
+      <Modal open={signin} onClose={() => setOpenSignin(false)}>
+        <div style={modalStyle} className={classes.paper}>
+          <form className="app__signup">
+            <center>
+              <img src={pf} height="70" width="70" />
+              <br></br>
+             
+
+              <Input
+                placeholder="email"
+                type="text"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+              />
+              <br></br>
+              <Input
+                placeholder="password"
+                type="password"
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+              />
+              <br></br>
+              <Button type="submit" onClick={Login}>
+               Login
               </Button>
             </center>
           </form>
         </div>
       </Modal>
-      <h1 className="app__signup">bllss</h1>
+      <h1 className="app__signup">bllsss</h1>
       <ImageUpload />
       {posts.map((post) => (
         <h1>
           {post.username}
           <br />
-        
+
           {post.caption}
         </h1>
       ))}
       <Button onClick={() => setOpen(true)}>SignUp</Button>
+      <Button onClick={() => setOpenSignin(true)}>Signin</Button>
     </div>
   );
 }
