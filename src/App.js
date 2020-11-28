@@ -1,7 +1,6 @@
 import "./App.css";
 import { db, auth } from "./firebase";
 import React, { useState, useEffect } from "react";
-import Post from "./Post";
 import ImageUpload from "./ImageUpload";
 import { Button, Input } from "@material-ui/core";
 import { makeStyles } from "@material-ui/core/styles";
@@ -39,42 +38,55 @@ function App() {
   const [username, setUsername] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
-  const [signin,setOpenSignin]=useState("");
+  const [signin, setOpenSignin] = useState("");
+  const [user, setUser] = useState(null);
 
   useEffect(() => {
-    db.collection("posts").onSnapshot((snapshot) => {
-      if (snapshot.docs.length == 0) {
-        console.log("No elements");
+    const unsubscribe = auth.onAuthStateChanged((authUser) => {
+      if (authUser) {
+        db.collection("posts").onSnapshot((snapshot) => {
+          setPosts(snapshot.docs.map((doc) => doc.data()));
+        });
+        setUser(authUser);
       } else {
-        console.log("elements");
+        setPosts([]);
+        setUser(null);
       }
-      //every time the db changes ittakes a snapshot
-      setPosts(snapshot.docs.map((doc) => doc.data()));
     });
-  }, []);
+    return () => {
+      unsubscribe();
+    };
+  }, [user, username]);
 
   const SignUp = (event) => {
     event.preventDefault();
     auth
       .createUserWithEmailAndPassword(email, password)
+      .then((cred) => {
+        return db.collection("posts").doc(cred.user.uid).set({
+          table: 4,
+        });
+      })
       .catch((error) => alert(error.message));
-      setOpen(false);
+    setOpen(false);
   };
 
-  const Login =(event)=>{
-    event.preventDefault(); 
+  const Login = (event) => {
+    event.preventDefault();
     auth
-    .signInWithEmailAndPassword(email,password)
-    .catch((error)=>alert(error.message));
+      .signInWithEmailAndPassword(email, password)
+      .catch((error) => alert(error.message));
     setOpenSignin(false);
-  }
+  };
+  
+
   return (
     <div className="App">
       <Modal open={open} onClose={() => setOpen(false)}>
         <div style={modalStyle} className={classes.paper}>
           <form className="app__signup">
             <center>
-              <img src={pf} height="70" width="70" />
+              <img src={pf} alt="" height="70" width="70" />
               <br></br>
               <Input
                 placeholder="username"
@@ -108,9 +120,8 @@ function App() {
         <div style={modalStyle} className={classes.paper}>
           <form className="app__signup">
             <center>
-              <img src={pf} height="70" width="70" />
+              <img src={pf} alt="" height="70" width="70" />
               <br></br>
-             
 
               <Input
                 placeholder="email"
@@ -127,7 +138,7 @@ function App() {
               />
               <br></br>
               <Button type="submit" onClick={Login}>
-               Login
+                Login
               </Button>
             </center>
           </form>
@@ -135,16 +146,28 @@ function App() {
       </Modal>
       <h1 className="app__signup">bllsss</h1>
       <ImageUpload />
+      {user ? (
+        <div>
+          <h4>Signed in with email-{user.email}</h4>
+          <Button onClick={() => auth.signOut()}>Logout </Button>
+          
+          {console.log(user.id)}
+          {console.log(user.email)}
+          {console.log(user.uid)}
+        </div>
+      ) : (
+        <div>
+          <Button onClick={() => setOpen(true)}>SignUp</Button>
+          <Button onClick={() => setOpenSignin(true)}>Login</Button>
+        </div>
+      )}
       {posts.map((post) => (
         <h1>
           {post.username}
           <br />
-
           {post.caption}
         </h1>
       ))}
-      <Button onClick={() => setOpen(true)}>SignUp</Button>
-      <Button onClick={() => setOpenSignin(true)}>Signin</Button>
     </div>
   );
 }
