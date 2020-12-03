@@ -7,6 +7,7 @@ import { makeStyles } from "@material-ui/core/styles";
 import Modal from "@material-ui/core/Modal";
 import pf from "./pf_circle.png";
 import "./App.css";
+import { getElementError } from "@testing-library/react";
 
 function getModalStyle() {
   const top = 50;
@@ -33,6 +34,7 @@ const useStyles = makeStyles((theme) => ({
 function App() {
   const classes = useStyles();
   const [posts, setPosts] = useState([]);
+  const [tables, setTables] = useState([]);
   const [open, setOpen] = useState(false);
   const [modalStyle] = React.useState(getModalStyle);
   const [username, setUsername] = useState("");
@@ -58,6 +60,15 @@ function App() {
     };
   }, [user, username]);
 
+  const gets = (user) => {
+    db.collection("posts")
+      .doc(user.uid)
+      .get()
+      .then((doc) => {
+        setTables(((doc.data().table)));
+      });
+  };
+
   const SignUp = (event) => {
     event.preventDefault();
     auth
@@ -78,7 +89,6 @@ function App() {
       .catch((error) => alert(error.message));
     setOpenSignin(false);
   };
-  
 
   return (
     <div className="App">
@@ -144,16 +154,18 @@ function App() {
           </form>
         </div>
       </Modal>
-      <h1 className="app__signup">bllsss</h1>
+
       <ImageUpload />
       {user ? (
         <div>
           <h4>Signed in with email-{user.email}</h4>
           <Button onClick={() => auth.signOut()}>Logout </Button>
-          
+          {gets(user)}
+
           {console.log(user.id)}
           {console.log(user.email)}
           {console.log(user.uid)}
+          {tables}
         </div>
       ) : (
         <div>
